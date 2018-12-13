@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="./underscore.js"></script>
+</head>
+
+<body>
+    <script>
+        /*
+        _.chain([1, 2, 3, 4, 5, 6, 7, 6, 5, 'a', 'A']).uniq(function (item) {
+            console.log(item)
+            return String(item).toLowerCase()
+        }).value()
+        */
+
+        /*
+                var mapresult = _.map([1,2,3],function(value,i){
+                    return value*2
+                })
+                console.log(mapresult)
+        */
+
+        /*
+        var timeResult = _.times(5, function (value) {
+            return value + 1
+        })
+        console.log(timeResult)
+        */
+        /*var reduceResult = _.reduce([1, 2, 3, 4, 5, 6], function (memo, value, index, obj) {
+            console.log(value)
+            return memo + value;
+        }, 0)
+        console.log(reduceResult)*/
+
+        /*
+        function add(a,rest){
+            return _.reduce(rest,function(memo,value,i,obj){
+                return memo+value
+            },a)
+        }
+        var curryAdd = _.restArgs(add)
+        console.log(curryAdd(1,2,3,4))
+        */
+
+        /*
+        var escapeMap = {
+            "<": "&lt;",
+            ">": "&gt;",
+            "&": "&amp;",
+            "'": '&apos;',
+            '"': '&quot;'
+        }
+
+        function createEscaper(map) {
+            var escaper = function (caper) {
+                return map[caper];
+            }
+            var exp = '(?:' + _.keys(map).join('|') + ')'
+            var testExp = new RegExp(exp)
+            var replaceExp = new RegExp(exp, 'g')
+
+            return function (string) {
+                string = string == null ? '' : string
+                return testExp.test(string) ? string.replace(replaceExp, escaper) : string
+            }
+        }
+
+        var escaper = createEscaper(escapeMap)
+
+        console.log(escaper('<script/>'))
+        */
+
+       var rules = {
+           interpolate:/\{\{([\s\S]+?)\}\}/
+       }
+       var matcher = new RegExp([rules.interpolate.source].join("|"),'g')
+       var template = "hello {{name}}"
+       var data = {name:'max'}
+       //渲染器
+       //第一个参数是 与正则匹配的文本
+       //第二个是与正则子表达式 匹配的 文本
+       function render(template,data){
+           return template.replace(matcher,function(match,interpolate,offset,stringobj){
+               console.log(interpolate)
+               return data[interpolate]
+           })
+       }
+       render(template,data)
+       //支持模板中植入js代码
+       //依靠function做字符串拼接
+       
+
+       var body = "alert('hello'+name)"
+       var fn = new Function("name",body) //参数 前面是 arg1,arg2.... 最后一个是函数的主体
+
+
+    </script>
+</body>
+
+</html>
