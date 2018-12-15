@@ -243,6 +243,25 @@
     //字符串发逃逸
     _.unescaper = createEscaper(unescapeMap)
 
+    _.extend = function () {
+        var target = arguments[0] || {},
+            i = 1,
+            length = arguments.length,
+            option,
+            key
+        if (typeof target !== 'object') {
+            target = {}
+        }
+        for (; i < length; i++) {
+            if ((option = arguments[i]) != null) {
+                for (key in option) {
+                    target[key] = option[key]
+                }
+            }
+        }
+        return target
+    }
+
     //需要逃逸的字符
     var escapeMap = {
         "<": "&lt;",
@@ -260,6 +279,17 @@
         escape: /<%-([\s\S]+?)%>/ //需要逃逸的字符
     }
 
+    var escapes = {
+        "'": "\\'",
+        "\\": "\\",
+        "\r": "r",
+        "\n": "n"
+    }
+
+    var escaperExp = /\\||'|\r|\n/
+    var escapeChar = function (match) {
+        return '\\' + escapes[match]
+    }
     /** 
      * 模板引擎
      * text 模板字符串
@@ -276,21 +306,30 @@
 
         //source 字符串保存函数
         var source = "_p+="
-        return text.replace(matcher, function (math, interpolate, escape, evalute) {
+        var index = 0
+        text.replace(matcher, function (match, interpolate, escape, evalute, offset) {
+            console.log(text.slice(index, offset))
+            source += text.slice(index, offset)
+            console.log(source)
+            index = offset + match.length;
             if (interpolate) {
+                console.log(interpolate)
                 //(_t=interpolate ) == null ? " ":_t
-                source += "'\n((_t=("+interpolate+"))==null?'':_t)+\n'"
+                source += "'\n((_t=(" + interpolate + "))==null?'':_.escaper(_t))+\n'"
             } else if (escape) {
-
+                source += "'\n((_t=(" + escape + "))==null?'':_t)+\n'"
             } else if (evalute) {
-
+                source += "';\n" + evalute + "\n_p+='";
             }
         })
         source += "';"
         //with 限定作用域
-        if(!settings.variable) source='width(obj||{}){\n'+source+'}\n'
-        source="var _t,p='';"+source+'return _p;\n'
+        console.log(source)
+        if (!settings.variable) source = '\nwith(obj||{}){\n' + source + '}\n'
+        console.log(source)
+        source = "var _t,p='';" + source + 'return _p;\n'
         //渲染函数
+        console.log(source)
         var render = new Function("obj", '_', source)
         var template = function (data) {
             return render.call(this, data, _)
@@ -298,6 +337,77 @@
         return template
     }
 
+    _.values = function (obj) {
+        var keys = _.keys(obj)
+        var length = keys.length
+        var values = Array(length)
+        for (var i = 0; i < length; i++) {
+            values[i] = obj[keys[i]]
+        }
+        return values
+    }
+
+    _.random = function (min, max) {
+        if (max == null) {
+            max = min
+            min = 0
+        }
+        return min + Math.floor(Math.random() * (max - min + 1))
+    }
+
+    //洗牌 乱序
+    _.shuffle = function (obj, length) {
+        var set = _.isArray(obj) ? obj : _.values(obj)
+        var length = set.length
+        console.log(length)
+        var shuffle = Array(length)
+
+        for (var i = 0, rand; i < length; i++) {
+            //生成一个随机数 1.整数 2.范围
+            rand = _.random(0, i)
+            shuffle[i] = shuffle[rand]
+            shuffle[rand] = set[i]
+        }
+
+        return shuffle
+    }
+
+    _.now = Data.now || function () {
+        return new Date().getTime()
+    }
+
+    _.debounce = function (fn, wait, n) {
+        var args
+        var timeout
+        var time
+        var later = function () {
+            //获取时间戳
+            var last = _.now() - time
+
+            if (last < wait){//还没有到达时间  继续设着定时器
+                timeout = setTimeout(later,wait-last)
+            } else{
+                timeout = null
+                if(!n){
+                    fn.apply(this,args)
+                }
+            }
+        }
+        //n为true时 立即调用处理函数
+        return function () {
+            args = arguments
+            //获取调用时候的时间戳
+            time = _.now()
+            var callNow = n && !timeout
+            //无论 callNow 是否有值都会设计一个定时器
+            if (!timeout) {
+                timeout = setTimeout(later, wait)
+            }
+            if (callNow) {
+                fn.apply(this, arguments)
+            }
+        }
+    }
     //mixin _ 遍历 数组
     _.mixin = function (obj) {
         _.each(_.functions(obj), function (name) {

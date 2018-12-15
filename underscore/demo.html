@@ -74,7 +74,7 @@
 
         console.log(escaper('<script/>'))
         */
-
+        /*
        var rules = {
            interpolate:/\{\{([\s\S]+?)\}\}/
        }
@@ -97,8 +97,19 @@
 
        var body = "alert('hello'+name)"
        var fn = new Function("name",body) //参数 前面是 arg1,arg2.... 最后一个是函数的主体
+       */
+       /*
+       var compile = _.template("hello: <%= name %>hello:<% = name %>")
+       console.log(compile({name:'max'}))
+       var compile = _.template("hello:' <%- value %>")
+       console.log(compile({value:"<a>"}))
+        */
+       /*console.log(_.shuffle([1,2,3,4,5]))*/
 
-
+       function fn(){
+           console.log('hello work')
+       }
+       window.onscroll = _.debounce(fn,1000)
     </script>
 </body>
 
