@@ -384,12 +384,12 @@
             //获取时间戳
             var last = _.now() - time
 
-            if (last < wait){//还没有到达时间  继续设着定时器
-                timeout = setTimeout(later,wait-last)
-            } else{
+            if (last < wait) {//还没有到达时间  继续设着定时器
+                timeout = setTimeout(later, wait - last)
+            } else {
                 timeout = null
-                if(!n){
-                    fn.apply(this,args)
+                if (!n) {
+                    fn.apply(this, args)
                 }
             }
         }
@@ -408,6 +408,40 @@
             }
         }
     }
+
+    //节流函数
+    _.throttle = function (fn, wait) {
+        //标记上一次执行事件的时间戳
+        var lastTime = 0
+        var args
+        var timeout = null
+        var later = function(){
+            lastTime = _.now()
+            func.apply(this,args)
+            timeout = null
+            args = null
+        }
+        return function () {
+            args = arguments
+            //记录当前的时间戳
+            var now = _.now()
+            var remaining = wait-(now-lastTime) //剩余的时间
+            if(remaining <=0){
+                if(timeout){
+                    clearTimeout(timeout)
+                    timeout = null
+                }
+                //重置触发前一次的时间戳
+                lastTime = now
+                //调用处理函数
+                fn.call(this,args)
+                args = null
+            } else if(!timeout) {
+                timeout = setTimeout(later,ramaining)
+            }
+        }
+    }
+
     //mixin _ 遍历 数组
     _.mixin = function (obj) {
         _.each(_.functions(obj), function (name) {
